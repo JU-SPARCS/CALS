@@ -12,11 +12,10 @@ class SimulationWidget(QtGui.QWidget):
     def login(self):
         data = self.createFakeData('login')
         sendData(data)
-        #sendData(int(self.idATCO.text()), "login", "Test", "Test", "Test", time.strftime('%Y-%m-%d %H:%M:%S'), True)
+
     def logout(self):
         data = self.createFakeData('logout')
         sendData(data)
-        #sendData(int(self.idATCO.text()), "logout", "Test", "Test", "Test", time.strftime('%Y-%m-%d %H:%M:%S'), True)
 
     def createFakeData(self, eventType):
         data = {

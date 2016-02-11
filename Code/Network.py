@@ -1,6 +1,8 @@
 ﻿import pymysql.cursors
 
-def sendData(id_controller, event_type, controller_role, controller_responsability, operational_status, controller_time, controller_state) :
+dbData = ['id_controller', 'event_type', 'controller_role', 'controller_responsability', 'operational_status', 'controller_time', 'traffic', 'weather', 'facility', 'air_space_segment', 'workstation']
+
+def sendData(data) :
     # Request
     try:
         # Connection to the database
@@ -13,8 +15,8 @@ def sendData(id_controller, event_type, controller_role, controller_responsabili
 
         with connection.cursor() as cursor:
             # Push Log-Event
-            sql = "INSERT INTO `logs_event` (`id_controller`, `event_type`, `controller_role`, `controller_responsability`, `operational_status`, `controller_time`, `controller_state` ) VALUES (%s, %s, %s, %s, %s, %s, %s)"
-            cursor.execute(sql, (id_controller, event_type, controller_role, controller_responsability, operational_status, controller_time, controller_state))
+            sql = "INSERT INTO `log_event` (`id_controller`, `event_type`, `controller_role`, `controller_responsability`, `operational_status`, `controller_time`, `traffic`, `weather`, `facility`, `air_space_segment`, `workstation`) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
+            cursor.execute(sql, (int(data[dbData[0]]), data[dbData[1]], data[dbData[2]], data[dbData[3]], data[dbData[4]], data[dbData[5]], data[dbData[6]], data[dbData[7]], data[dbData[8]], data[dbData[9]], data[dbData[10]]))
 
         # Commit to save the changes
         connection.commit()

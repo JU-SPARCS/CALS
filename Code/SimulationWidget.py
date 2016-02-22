@@ -1,10 +1,18 @@
 from PyQt4 import QtCore, QtGui, uic
 from Network import sendData, dbData
+from connectionHandler import createJSONFormat,postRequest
 import time
+
+#LIST OF TODO'S
+#CHANGE COMMENTS TO REFLECT ACTUALL USAGE
+#CLEAN THE CODE
+#ADD USABILITY FEATURES.
+#ADD TRY CATCH methods to the connectionHandler
 
 class SimulationWidget(QtGui.QWidget):
     
     Logged = False
+    baseURL = 'http://193.10.30.129:8080/'
 
     def __init__(self):
         super(SimulationWidget, self).__init__()
@@ -36,7 +44,10 @@ class SimulationWidget(QtGui.QWidget):
         """
         if(self.Logged == False and self.check_values()):
             data = self.createData('login')
-            sendData(data)
+            JSONstring = createJSONFormat(data)
+            URL = self.baseURL + 'login'
+            postRequest(URL,JSONstring)
+            #sendData(data)
             self.Logged = 1
             return True
         else:
@@ -51,7 +62,10 @@ class SimulationWidget(QtGui.QWidget):
         """
         if(self.Logged == True and self.check_values()):
             data = self.createData('logout')
-            sendData(data)
+            JSONstring = createJSONFormat(data)
+            URL = self.baseURL + 'logout'
+            postRequest(URL,JSONstring)
+            #sendData(data)
             self.Logged = 0
             return True
         else:
@@ -67,7 +81,11 @@ class SimulationWidget(QtGui.QWidget):
         """
         if(self.Logged == True and self.check_values()):
             data = self.createData('role change')
-            sendData(data)
+            JSONstring = createJSONFormat(data)
+            URL = self.baseURL + 'roleChange'
+            postRequest(URL,JSONstring)
+            
+            #sendData(data)
             return True
         else:
             if(self.Logged == False):
@@ -98,9 +116,6 @@ class SimulationWidget(QtGui.QWidget):
         if( not self.check_integer(self.controllerID_line.text())):
             self.error_lbl.setText('Controller ID has to be a number and not less than zero')
             return False
-        elif(not self.check_integer(self.workstationID_line.text())):
-            self.error_lbl.setText('Workstation ID has to be a number and not less than zero')
-            return False
         else:
             self.error_lbl.setText(' ')
             return True
@@ -112,17 +127,34 @@ class SimulationWidget(QtGui.QWidget):
         Output: Dictionairy
         Purpose: Collates all the data
         """
+        data = []
+        data.append(int(self.controllerID_line.text()))
+        data.append(str(eventType))
+        data.append(str(self.role_cmbox.currentText()))
+        data.append(str(self.responsibility_cmbox.currentText()))
+        data.append(str(self.operational_cmbox.currentText()))
+        data.append(str(time.strftime('%Y-%m-%d %H:%M:%S')))
+        data.append('None')
+        data.append('None')
+        data.append(str(self.facility_line.text()),)
+        data.append('None')
+        data.append(str(self.workstationID_line.text()))
+        data.append(int(0))
+        
+        """"
         data = {
-            dbData[0] : self.controllerID_line.text(),
-            dbData[1] : eventType,
+            dbData[0] : str(self.controllerID_line.text()),
+            dbData[1] : str(eventType),
             dbData[2] : str(self.role_cmbox.currentText()),
             dbData[3] : str(self.responsibility_cmbox.currentText()),
             dbData[4] : str(self.operational_cmbox.currentText()),
-            dbData[5] : time.strftime('%Y-%m-%d %H:%M:%S'),
+            dbData[5] : str(time.strftime('%Y-%m-%d %H:%M:%S')),
             dbData[6] : 'None',
             dbData[7] : 'None',
-            dbData[8] : self.facility_line.text(),
+            dbData[8] : str(self.facility_line.text()),
             dbData[9] : 'None',
-            dbData[10] : self.workstationID_line.text()
+            dbData[10] : str(self.workstationID_line.text()),
+            dbData[11] : str(0)
         }
+        """
         return data

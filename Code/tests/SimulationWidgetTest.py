@@ -95,7 +95,7 @@ class SimulationWidgetTest(unittest.TestCase):
         self.assertTrue(self.widget.rolechange())
         self.assertTrue(self.widget.isLogged())
 
-
+# This code will actually execute the tests
 suite = unittest.TestLoader().loadTestsFromTestCase(SimulationWidgetTest)
 unittest.TextTestRunner(verbosity=2).run(suite)
         

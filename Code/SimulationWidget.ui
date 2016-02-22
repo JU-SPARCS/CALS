@@ -337,7 +337,7 @@
     </font>
    </property>
    <property name="text">
-    <string>Workstation ID</string>
+    <string>Workstation</string>
    </property>
   </widget>
   <widget class="QLineEdit" name="workstationID_line">

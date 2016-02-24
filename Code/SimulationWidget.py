@@ -11,11 +11,13 @@ import time
 
 class SimulationWidget(QtGui.QWidget):
     
+    testMode = False
     Logged = False
     baseURL = 'http://193.10.30.129:8080/'
 
-    def __init__(self):
+    def __init__(self, testMode = False):
         super(SimulationWidget, self).__init__()
+        self.testMode = testMode
         uic.loadUi('SimulationWidget.ui', self)
         self.login_btn.clicked.connect(self.login)
         self.logout_btn.clicked.connect(self.logout)
@@ -46,7 +48,8 @@ class SimulationWidget(QtGui.QWidget):
             data = self.createData('login')
             JSONstring = createJSONFormat(data)
             URL = self.baseURL + 'login'
-            postRequest(URL,JSONstring)
+            if self.testMode == False:
+                postRequest(URL,JSONstring)
             #sendData(data)
             self.Logged = 1
             return True
@@ -64,7 +67,8 @@ class SimulationWidget(QtGui.QWidget):
             data = self.createData('logout')
             JSONstring = createJSONFormat(data)
             URL = self.baseURL + 'logout'
-            postRequest(URL,JSONstring)
+            if self.testMode == False:
+                postRequest(URL,JSONstring)
             #sendData(data)
             self.Logged = 0
             return True
@@ -83,7 +87,8 @@ class SimulationWidget(QtGui.QWidget):
             data = self.createData('role change')
             JSONstring = createJSONFormat(data)
             URL = self.baseURL + 'roleChange'
-            postRequest(URL,JSONstring)
+            if self.testMode == False:
+                postRequest(URL,JSONstring)
             
             #sendData(data)
             return True

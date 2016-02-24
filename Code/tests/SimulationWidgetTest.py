@@ -11,7 +11,7 @@ class SimulationWidgetTest(unittest.TestCase):
     '''Test the SimulationWidget UI'''
     def setUp(self):
         '''Create the GUI'''
-        self.widget = SimulationWidget.SimulationWidget()
+        self.widget = SimulationWidget.SimulationWidget(testMode = True)
 
     def test_default_controller_id(self):
         self.assertEqual(self.widget.controllerID_line.text(), "")

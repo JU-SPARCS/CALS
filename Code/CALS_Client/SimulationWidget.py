@@ -1,13 +1,6 @@
 from PyQt4 import QtCore, QtGui, uic
-from Network import sendData, dbData
 from connectionHandler import createJSONFormat,postRequest
 import time
-
-#LIST OF TODO'S
-#CHANGE COMMENTS TO REFLECT ACTUALL USAGE
-#CLEAN THE CODE
-#ADD USABILITY FEATURES.
-#ADD TRY CATCH methods to the connectionHandler
 
 class SimulationWidget(QtGui.QWidget):
     
@@ -27,14 +20,14 @@ class SimulationWidget(QtGui.QWidget):
         """
         Input: isLogged: Boolean
         Output: None
-        Purpose: To set the Logged variable with the desired status(Boolean)
+        Purpose: To set the Logged variable with the desired status(Boolean). Used for tests
         """
         self.Logged = isLogged
     def isLogged(self):
         """
         Input: None
         Output: Boolean
-        Purpose: Returns the Logged Variable
+        Purpose: Returns the Logged Variable used in tests.
         """
         return self.Logged
     
@@ -51,13 +44,13 @@ class SimulationWidget(QtGui.QWidget):
             URL = self.baseURL + 'login'
             if self.testMode == False:
                 postRequest(URL,JSONstring)
-            #sendData(data)
             self.Logged = 1
             return True
         else:
             if(self.Logged == True):
                 self.error_lbl.setText('You need to log out to log in')
             return False
+
     def logout(self):
         """
         Input: None
@@ -71,7 +64,6 @@ class SimulationWidget(QtGui.QWidget):
             URL = self.baseURL + 'logout'
             if self.testMode == False:
                 postRequest(URL,JSONstring)
-            #sendData(data)
             self.Logged = 0
             return True
         else:
@@ -91,8 +83,6 @@ class SimulationWidget(QtGui.QWidget):
             URL = self.baseURL + 'roleChange'
             if self.testMode == False:
                 postRequest(URL,JSONstring)
-            
-            #sendData(data)
             return True
         else:
             if(self.Logged == False):
@@ -134,38 +124,21 @@ class SimulationWidget(QtGui.QWidget):
 
     def createData(self, eventType):
         """
-        Input: value: eventType: String
-        Output: Dictionairy
-        Purpose: Collates all the data
+        Input: eventType: String
+        Output: List
+        Purpose: Collates all the data into a list
         """
         data = []
-        data.append(int(self.controllerID_line.text()))
-        data.append(str(eventType))
-        data.append(str(self.role_cmbox.currentText()))
-        data.append(str(self.responsibility_cmbox.currentText()))
-        data.append(str(self.operational_cmbox.currentText()))
-        data.append(str(time.strftime('%Y-%m-%d %H:%M:%S')))
-        data.append('None')
-        data.append('None')
-        data.append(str(self.facility_line.text()),)
-        data.append('None')
-        data.append(str(self.workstationID_line.text()))
-        data.append(int(0))
-        
-        """"
-        data = {
-            dbData[0] : str(self.controllerID_line.text()),
-            dbData[1] : str(eventType),
-            dbData[2] : str(self.role_cmbox.currentText()),
-            dbData[3] : str(self.responsibility_cmbox.currentText()),
-            dbData[4] : str(self.operational_cmbox.currentText()),
-            dbData[5] : str(time.strftime('%Y-%m-%d %H:%M:%S')),
-            dbData[6] : 'None',
-            dbData[7] : 'None',
-            dbData[8] : str(self.facility_line.text()),
-            dbData[9] : 'None',
-            dbData[10] : str(self.workstationID_line.text()),
-            dbData[11] : str(0)
-        }
-        """
+        data.append(int(self.controllerID_line.text())) # 0 Controller ID
+        data.append(str(eventType)) # 1 event type
+        data.append(str(self.role_cmbox.currentText())) # 2 Controller Role
+        data.append(str(self.responsibility_cmbox.currentText())) # 3 Controller Responsibility
+        data.append(str(self.operational_cmbox.currentText())) # 4 Operational status
+        data.append(str(time.strftime('%Y-%m-%d %H:%M:%S'))) # 5 Current Time
+        data.append('None') # 6 Traffic Handled by NARMS so it can stay as none
+        data.append('None') # 7 Weather Handled by NARMS so it can stay as none
+        data.append(str(self.facility_line.text()),) # 8 Facility Name
+        data.append('None') # 9 Air space segment Handled by NARMS so it can stay as none
+        data.append(str(self.workstationID_line.text())) # 10 Workstaion Name
+        data.append(int(0)) # 11 Is sent to NARMS Handled by CALS SIM server.
         return data

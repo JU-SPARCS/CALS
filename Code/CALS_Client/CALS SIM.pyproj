@@ -29,7 +29,6 @@
     <Compile Include="RunTestSuite.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Network.py" />
     <Compile Include="SimulationWidget.py" />
   </ItemGroup>
   <Import Project="$(PtvsTargetsFile)" Condition="Exists($(PtvsTargetsFile))" />

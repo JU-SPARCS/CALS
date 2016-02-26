@@ -45,6 +45,7 @@ class SimulationWidget(QtGui.QWidget):
         Purpose: Handles the login function for the application and returns a boolean whenever its succesfull or not
         """
         if(self.Logged == False and self.check_values()):
+            self.setTextInputsEnabledStatus(False)
             data = self.createData('login')
             JSONstring = createJSONFormat(data)
             URL = self.baseURL + 'login'
@@ -64,6 +65,7 @@ class SimulationWidget(QtGui.QWidget):
         Purpose: Handles the logout function for the application and returns a boolean whenever its succesfull or not
         """
         if(self.Logged == True and self.check_values()):
+            self.setTextInputsEnabledStatus(True)
             data = self.createData('logout')
             JSONstring = createJSONFormat(data)
             URL = self.baseURL + 'logout'
@@ -124,6 +126,10 @@ class SimulationWidget(QtGui.QWidget):
         else:
             self.error_lbl.setText(' ')
             return True
+    def setTextInputsEnabledStatus(self, status):
+        self.controllerID_line.setEnabled(status)
+        self.facility_line.setEnabled(status)
+        self.workstationID_line.setEnabled(status)
 
 
     def createData(self, eventType):

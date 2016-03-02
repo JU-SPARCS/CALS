@@ -1,8 +1,9 @@
 ﻿import sys
-from PyQt4.QtGui import *
+from PyQt5.QtCore import *
+from PyQt5.QtWidgets import *
 from SimulationWidget import SimulationWidget
 
-# Create an PyQT4 application object.
+# Create an PyQT5 application object.
 a = QApplication(sys.argv)
 
 # The QWidget widget is the base class of all user interface objects in PyQt4.

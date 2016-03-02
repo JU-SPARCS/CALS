@@ -1,144 +1,220 @@
-from PyQt4 import QtCore, QtGui, uic
+﻿from PyQt5.QtCore import *
+from PyQt5.QtWidgets import *
+from PyQt5.uic import loadUi   
 from connectionHandler import createJSONFormat,postRequest
 import time
+import pymysql
 
-class SimulationWidget(QtGui.QWidget):
-    
-    testMode = False
-    Logged = False
-    baseURL = 'http://193.10.30.129:8080/'
+""" db connection """
+DB_HOST = '193.10.30.129'
+DB_USER = 'root'
+DB_PASSWORD = 'JTH123!'
+DB_NAME = 'cals_sim'
 
-    def __init__(self, testMode = False):
+def dbConnection():
+    connection = pymysql.connect(host=DB_HOST,
+                                 user=DB_USER,
+                                 password=DB_PASSWORD,
+                                 db=DB_NAME)
+    return connection
+
+
+connection = dbConnection()
+
+class SimulationWidget(QDialog):
+
+    def __init__(self):
         super(SimulationWidget, self).__init__()
-        self.testMode = testMode
-        uic.loadUi('SimulationWidget.ui', self)
-        self.login_btn.clicked.connect(self.login)
-        self.logout_btn.clicked.connect(self.logout)
-        self.role_change_btn.clicked.connect(self.rolechange)
-            
-    def setLogged(self, isLogged):
-        """
-        Input: isLogged: Boolean
-        Output: None
-        Purpose: To set the Logged variable with the desired status(Boolean). Used for tests
-        """
-        self.Logged = isLogged
-    def isLogged(self):
-        """
-        Input: None
-        Output: Boolean
-        Purpose: Returns the Logged Variable used in tests.
-        """
-        return self.Logged
-    
-    def login(self):
-        """
-        Input: None
-        Output: Boolean
-        Purpose: Handles the login function for the application and returns a boolean whenever its succesfull or not
-        """
-        if(self.Logged == False and self.check_values()):
-            self.setTextInputsEnabledStatus(False)
-            data = self.createData('login')
-            JSONstring = createJSONFormat(data)
-            URL = self.baseURL + 'login'
-            if self.testMode == False:
-                postRequest(URL,JSONstring)
-            self.Logged = 1
-            return True
+        loadUi('select-facilities-workstations.ui', self)
+        self.cur = connection.cursor(pymysql.cursors.DictCursor)
+        self.cur.execute("SELECT * FROM facilities")
+        self.listFacilities = self.cur.fetchall()
+        self.cur.execute("SELECT * FROM workstations") 
+        self.listWorkstations = self.cur.fetchall()
+        self.facilities.clear()
+        for facility in self.listFacilities:
+            self.facilities.addItem(facility["name"])
+        self.workstations.clear()
+        for workstation in self.listWorkstations:
+            self.workstations.addItem(workstation["name"])
+        self.launch.clicked.connect(self.launchAction)
+        self.log = None
+
+
+    def launchAction(self):
+        self.log = LogWidget(self.facilities.currentText(), self.workstations.currentText())
+        self.log.show()
+
+class LogWidget(QDialog):
+    def __init__(self, facility, workstation):
+        super(LogWidget, self).__init__()
+        loadUi('field-workers.ui', self)
+        self.facility = facility
+        self.workstation = workstation
+        self.operationalStatusList = [ self.operational_status.itemText(i) for i in range(self.operational_status.count())]
+        self.cur = connection.cursor(pymysql.cursors.DictCursor)
+        self.cur.execute("SELECT * FROM users u LEFT JOIN facilities f on u.facilitiesid = f.id where f.name LIKE %s ", facility)
+        self.users = self.cur.fetchall()
+        self.controller_id_1.clear()
+        self.controller_id_1.addItem("choice")
+        self.controller_id_2.addItem("choice")
+        for user in self.users:
+            self.controller_id_1.addItem(user["name"])
+            self.controller_id_2.addItem(user["name"])
+        self.controller_id_1.currentIndexChanged.connect(self.controller1Action)
+        self.controller_id_2.currentIndexChanged.connect(self.controller2Action)
+        self.login.clicked.connect(self.loginAction)
+        self.change_role.clicked.connect(self.updateAction)
+        self.logout.clicked.connect(self.logoutAction)
+
+    def logoutAction(self):
+        
+        if (self.controller_id_1.currentText() == self.controller_id_2.currentText()):
+            self.error.setText('The field controller Id 1 and controller Id 2 are same !')
         else:
-            if(self.Logged == True):
-                self.error_lbl.setText('You need to log out to log in')
-            return False
+            if (self.controller_id_1.currentText() != "choice"):
+                self.cur.execute("SELECT * FROM users u WHERE u.name LIKE %s ", self.controller_id_1.currentText())
+                userMysql = self.cur.fetchone()
+                userId = userMysql["id"]
+                self.cur.execute("SELECT * FROM facilities f WHERE f.name LIKE %s ", self.facility)
+                facilityMysql = self.cur.fetchone()
+                facilityId = facilityMysql["id"]
+                self.cur.execute("SELECT * FROM workstations w WHERE w.name LIKE %s ", self.workstation)
+                workstationMysql = self.cur.fetchone()
+                workstationId = workstationMysql["id"]
+                v = ("logout", self.role.currentText(), self.controller_responsability.currentText(), self.operational_status.currentText(), 0, int(userId), int(facilityId), int(workstationId))
+                connect = connection.cursor()
+                connect.execute("INSERT INTO log_events (event_type, controller_role, controller_responsability, operational_status, date, send_to_narms, usersid, facilitiesid, workstationsid) VALUES (%s, %s,%s,%s,NOW(),%s,%s,%s,%s)", v) 
+                connection.commit()
 
-    def logout(self):
-        """
-        Input: None
-        Output: Boolean
-        Purpose: Handles the logout function for the application and returns a boolean whenever its succesfull or not
-        """
-        if(self.Logged == True and self.check_values()):
-            self.setTextInputsEnabledStatus(True)
-            data = self.createData('logout')
-            JSONstring = createJSONFormat(data)
-            URL = self.baseURL + 'logout'
-            if self.testMode == False:
-                postRequest(URL,JSONstring)
-            self.Logged = 0
-            return True
+            if (self.controller_id_2.currentText() != "choice"):
+                self.cur.execute("SELECT * FROM users u WHERE u.name LIKE %s ", self.controller_id_2.currentText())
+                userMysql = self.cur.fetchone()
+                userId = userMysql["id"]
+                self.cur.execute("SELECT * FROM facilities f WHERE f.name LIKE %s ", self.facility)
+                facilityMysql = self.cur.fetchone()
+                facilityId = facilityMysql["id"]
+                self.cur.execute("SELECT * FROM workstations w WHERE w.name LIKE %s ", self.workstation)
+                workstationMysql = self.cur.fetchone()
+                workstationId = workstationMysql["id"]
+                if (self.operational_status.currentText() == "MCU"):
+                    v = ("logout", self.role.currentText(), self.controller_responsability.currentText(), "MCU", 0, int(userId), int(facilityId), int(workstationId))
+                if (self.operational_status.currentText() == "MCM"):
+                    v = ("logout", self.role.currentText(), self.controller_responsability.currentText(), "MCS", 0, int(userId), int(facilityId), int(workstationId))
+                if (self.operational_status.currentText() == "MCI"):
+                    v = ("logout", self.role.currentText(), self.controller_responsability.currentText(), "MCT", 0, int(userId), int(facilityId), int(workstationId))
+                connect = connection.cursor()
+                connect.execute("INSERT INTO log_events (event_type, controller_role, controller_responsability, operational_status, date, send_to_narms, usersid, facilitiesid, workstationsid) VALUES (%s, %s,%s,%s,NOW(),%s,%s,%s,%s)", v) 
+                connection.commit()
+
+    def updateAction(self):
+        
+        if (self.controller_id_1.currentText() == self.controller_id_2.currentText()):
+            self.error.setText('The field controller Id 1 and controller Id 2 are same !')
         else:
-            if(self.Logged == False):
-                self.error_lbl.setText('You need to be logged in to log out')
-            return False
+            if (self.controller_id_1.currentText() != "choice"):
+                self.cur.execute("SELECT * FROM users u WHERE u.name LIKE %s ", self.controller_id_1.currentText())
+                userMysql = self.cur.fetchone()
+                userId = userMysql["id"]
+                self.cur.execute("SELECT * FROM facilities f WHERE f.name LIKE %s ", self.facility)
+                facilityMysql = self.cur.fetchone()
+                facilityId = facilityMysql["id"]
+                self.cur.execute("SELECT * FROM workstations w WHERE w.name LIKE %s ", self.workstation)
+                workstationMysql = self.cur.fetchone()
+                workstationId = workstationMysql["id"]
+                v = ("update", self.role.currentText(), self.controller_responsability.currentText(), self.operational_status.currentText(), 0, int(userId), int(facilityId), int(workstationId))
+                connect = connection.cursor()
+                connect.execute("INSERT INTO log_events (event_type, controller_role, controller_responsability, operational_status, date, send_to_narms, usersid, facilitiesid, workstationsid) VALUES (%s, %s,%s,%s,NOW(),%s,%s,%s,%s)", v) 
+                connection.commit()
 
-    def rolechange(self):
-        """
-        Input: None
-        Output: Boolean
-        Purpose: Handles the role change function for the application and returns a boolean whenever its succesfull or not
-        """
-        if(self.Logged == True and self.check_values()):
-            data = self.createData('role change')
-            JSONstring = createJSONFormat(data)
-            URL = self.baseURL + 'roleChange'
-            if self.testMode == False:
-                postRequest(URL,JSONstring)
-            return True
+            if (self.controller_id_2.currentText() != "choice"):
+                self.cur.execute("SELECT * FROM users u WHERE u.name LIKE %s ", self.controller_id_2.currentText())
+                userMysql = self.cur.fetchone()
+                userId = userMysql["id"]
+                self.cur.execute("SELECT * FROM facilities f WHERE f.name LIKE %s ", self.facility)
+                facilityMysql = self.cur.fetchone()
+                facilityId = facilityMysql["id"]
+                self.cur.execute("SELECT * FROM workstations w WHERE w.name LIKE %s ", self.workstation)
+                workstationMysql = self.cur.fetchone()
+                workstationId = workstationMysql["id"]
+                if (self.operational_status.currentText() == "MCU"):
+                    v = ("update", self.role.currentText(), self.controller_responsability.currentText(), "MCU", 0, int(userId), int(facilityId), int(workstationId))
+                if (self.operational_status.currentText() == "MCM"):
+                    v = ("update", self.role.currentText(), self.controller_responsability.currentText(), "MCS", 0, int(userId), int(facilityId), int(workstationId))
+                if (self.operational_status.currentText() == "MCI"):
+                    v = ("update", self.role.currentText(), self.controller_responsability.currentText(), "MCT", 0, int(userId), int(facilityId), int(workstationId))
+                connect = connection.cursor()
+                connect.execute("INSERT INTO log_events (event_type, controller_role, controller_responsability, operational_status, date, send_to_narms, usersid, facilitiesid, workstationsid) VALUES (%s, %s,%s,%s,NOW(),%s,%s,%s,%s)", v) 
+                connection.commit()
+
+
+    def loginAction(self):
+        if (self.controller_id_1.currentText() == self.controller_id_2.currentText()):
+            self.error.setText('The field controller Id 1 and controller Id 2 are same !')
         else:
-            if(self.Logged == False):
-                self.error_lbl.setText('You need to be logged in to change role')
-            return False
+            if (self.controller_id_1.currentText() != "choice"):
+                self.cur.execute("SELECT * FROM users u WHERE u.name LIKE %s ", self.controller_id_1.currentText())
+                userMysql = self.cur.fetchone()
+                userId = userMysql["id"]
+                self.cur.execute("SELECT * FROM facilities f WHERE f.name LIKE %s ", self.facility)
+                facilityMysql = self.cur.fetchone()
+                facilityId = facilityMysql["id"]
+                self.cur.execute("SELECT * FROM workstations w WHERE w.name LIKE %s ", self.workstation)
+                workstationMysql = self.cur.fetchone()
+                workstationId = workstationMysql["id"]
+                v = ("login", self.role.currentText(), self.controller_responsability.currentText(), self.operational_status.currentText(), 0, int(userId), int(facilityId), int(workstationId))
+                connect = connection.cursor()
+                connect.execute("INSERT INTO log_events (event_type, controller_role, controller_responsability, operational_status, date, send_to_narms, usersid, facilitiesid, workstationsid) VALUES (%s, %s,%s,%s,NOW(),%s,%s,%s,%s)", v) 
+                connection.commit()
 
-    def check_integer(self,value):
-        """
-        Input: value: Integer
-        Output: Boolean
-        Purpose: Checks if value is a valid integer and not less than 0
-        """
-        try:
-            int(value)
-        except ValueError:
-            return False
-        if (int(value) < 0):
-            return False
+            if (self.controller_id_2.currentText() != "choice"):
+                self.cur.execute("SELECT * FROM users u WHERE u.name LIKE %s ", self.controller_id_2.currentText())
+                userMysql = self.cur.fetchone()
+                userId = userMysql["id"]
+                self.cur.execute("SELECT * FROM facilities f WHERE f.name LIKE %s ", self.facility)
+                facilityMysql = self.cur.fetchone()
+                facilityId = facilityMysql["id"]
+                self.cur.execute("SELECT * FROM workstations w WHERE w.name LIKE %s ", self.workstation)
+                workstationMysql = self.cur.fetchone()
+                workstationId = workstationMysql["id"]
+                if (self.operational_status.currentText() == "MCU"):
+                    v = ("login", self.role.currentText(), self.controller_responsability.currentText(), "MCU", 0, int(userId), int(facilityId), int(workstationId))
+                if (self.operational_status.currentText() == "MCM"):
+                    v = ("login", self.role.currentText(), self.controller_responsability.currentText(), "MCS", 0, int(userId), int(facilityId), int(workstationId))
+                if (self.operational_status.currentText() == "MCI"):
+                    v = ("login", self.role.currentText(), self.controller_responsability.currentText(), "MCT", 0, int(userId), int(facilityId), int(workstationId))
+                connect = connection.cursor()
+                connect.execute("INSERT INTO log_events (event_type, controller_role, controller_responsability, operational_status, date, send_to_narms, usersid, facilitiesid, workstationsid) VALUES (%s, %s,%s,%s,NOW(),%s,%s,%s,%s)", v) 
+                connection.commit()              
+
+    def controller1Action(self):
+        operationalStatus = [ self.operational_status.itemText(i) for i in range(self.operational_status.count())]
+        if (self.controller_id_1.currentText() != "choice"):
+            if (self.controller_id_2.currentText() != "choice"):
+                    self.operational_status.clear()
+                    for i in range(len(self.operationalStatusList)):
+                        if (self.operationalStatusList[i] != "SC"):
+                            self.operational_status.addItem(self.operationalStatusList[i])
+                            self.operational_status.update()
+            else:
+                self.operational_status.clear()
+                self.operational_status.addItem("SC")
+                self.operational_status.update()
+
+    def controller2Action(self):
+        operationalStatus = [ self.operational_status.itemText(i) for i in range(self.operational_status.count())]
+        if (self.controller_id_1.currentText() == "choice"):
+            if (self.controller_id_2.currentText() != "choice"):
+                self.operational_status.clear()
+                self.operational_status.update()
         else:
-            return True
-
-    def check_values(self):
-        """
-        Input: None
-        Output: Boolean
-        Purpose: Checks the ID's for invalidness and if so prints a error message to the error label then returns false, else it will return true
-        """
-        if( not self.check_integer(self.controllerID_line.text())):
-            self.error_lbl.setText('Controller ID has to be a number and not less than zero')
-            return False
-        else:
-            self.error_lbl.setText(' ')
-            return True
-    def setTextInputsEnabledStatus(self, status):
-        self.controllerID_line.setEnabled(status)
-        self.facility_line.setEnabled(status)
-        self.workstationID_line.setEnabled(status)
-
-
-    def createData(self, eventType):
-        """
-        Input: eventType: String
-        Output: List
-        Purpose: Collates all the data into a list
-        """
-        data = []
-        data.append(int(self.controllerID_line.text())) # 0 Controller ID
-        data.append(str(eventType)) # 1 event type
-        data.append(str(self.role_cmbox.currentText())) # 2 Controller Role
-        data.append(str(self.responsibility_cmbox.currentText())) # 3 Controller Responsibility
-        data.append(str(self.operational_cmbox.currentText())) # 4 Operational status
-        data.append(str(time.strftime('%Y-%m-%d %H:%M:%S'))) # 5 Current Time
-        data.append('None') # 6 Traffic Handled by NARMS so it can stay as none
-        data.append('None') # 7 Weather Handled by NARMS so it can stay as none
-        data.append(str(self.facility_line.text()),) # 8 Facility Name
-        data.append('None') # 9 Air space segment Handled by NARMS so it can stay as none
-        data.append(str(self.workstationID_line.text())) # 10 Workstaion Name
-        data.append(int(0)) # 11 Is sent to NARMS Handled by CALS SIM server.
-        return data
+            if (self.controller_id_2.currentText() != "choice"):
+                self.operational_status.clear()
+                for i in range(len(self.operationalStatusList)):
+                    if (self.operationalStatusList[i] != "SC"):
+                        self.operational_status.addItem(self.operationalStatusList[i])
+                        self.operational_status.update()
+            else:
+                self.operational_status.clear()
+                self.operational_status.addItem("SC")
+                self.operational_status.update()

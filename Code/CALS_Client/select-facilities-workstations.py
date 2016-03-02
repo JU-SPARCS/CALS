@@ -1,0 +1,93 @@
+# -*- coding: utf-8 -*-
+
+# Form implementation generated from reading ui file 'select-facilities-workstations.ui'
+#
+# Created by: PyQt5 UI code generator 5.5.1
+#
+# WARNING! All changes made in this file will be lost!
+
+from PyQt5 import QtCore, QtGui, QtWidgets
+
+class Ui_Dialog(object):
+    def setupUi(self, Dialog):
+        Dialog.setObjectName("Dialog")
+        Dialog.resize(400, 300)
+        font = QtGui.QFont()
+        font.setFamily("Nirmala UI")
+        font.setPointSize(20)
+        font.setBold(True)
+        font.setWeight(75)
+        Dialog.setFont(font)
+        self.launch = QtWidgets.QPushButton(Dialog)
+        self.launch.setGeometry(QtCore.QRect(290, 250, 93, 28))
+        font = QtGui.QFont()
+        font.setFamily("MS Sans Serif")
+        font.setPointSize(9)
+        font.setBold(False)
+        font.setWeight(50)
+        self.launch.setFont(font)
+        self.launch.setObjectName("launch")
+        self.label = QtWidgets.QLabel(Dialog)
+        self.label.setGeometry(QtCore.QRect(0, 10, 391, 51))
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Maximum)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.label.sizePolicy().hasHeightForWidth())
+        self.label.setSizePolicy(sizePolicy)
+        self.label.setMinimumSize(QtCore.QSize(0, 0))
+        font = QtGui.QFont()
+        font.setFamily("Nirmala UI")
+        font.setPointSize(16)
+        font.setBold(True)
+        font.setWeight(75)
+        self.label.setFont(font)
+        self.label.setAlignment(QtCore.Qt.AlignCenter)
+        self.label.setObjectName("label")
+        self.facilities = QtWidgets.QComboBox(Dialog)
+        self.facilities.setGeometry(QtCore.QRect(20, 110, 131, 22))
+        font = QtGui.QFont()
+        font.setFamily("Sitka Small")
+        font.setPointSize(9)
+        font.setBold(False)
+        font.setWeight(50)
+        self.facilities.setFont(font)
+        self.facilities.setObjectName("facilities")
+        self.workstations = QtWidgets.QComboBox(Dialog)
+        self.workstations.setGeometry(QtCore.QRect(20, 160, 131, 22))
+        font = QtGui.QFont()
+        font.setFamily("Sitka Small")
+        font.setPointSize(9)
+        font.setBold(False)
+        font.setWeight(50)
+        self.workstations.setFont(font)
+        self.workstations.setObjectName("workstations")
+        self.label_4 = QtWidgets.QLabel(Dialog)
+        self.label_4.setGeometry(QtCore.QRect(20, 80, 71, 16))
+        font = QtGui.QFont()
+        font.setFamily("Sitka Small")
+        font.setPointSize(8)
+        font.setBold(False)
+        font.setWeight(50)
+        self.label_4.setFont(font)
+        self.label_4.setObjectName("label_4")
+        self.label_5 = QtWidgets.QLabel(Dialog)
+        self.label_5.setGeometry(QtCore.QRect(20, 140, 101, 16))
+        font = QtGui.QFont()
+        font.setFamily("Sitka Small")
+        font.setPointSize(8)
+        font.setBold(False)
+        font.setWeight(50)
+        self.label_5.setFont(font)
+        self.label_5.setObjectName("label_5")
+
+        self.retranslateUi(Dialog)
+        QtCore.QMetaObject.connectSlotsByName(Dialog)
+
+    def retranslateUi(self, Dialog):
+        _translate = QtCore.QCoreApplication.translate
+        Dialog.setWindowTitle(_translate("Dialog", "Dialog"))
+        self.launch.setText(_translate("Dialog", "Launch"))
+        self.label.setText(_translate("Dialog", "CALS SIM"))
+        self.label_4.setText(_translate("Dialog", "Facilities"))
+        self.label_5.setText(_translate("Dialog", "Workstations"))
+

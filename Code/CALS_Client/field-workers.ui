@@ -151,25 +151,6 @@
     <string>Log Out</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="change_role">
-   <property name="geometry">
-    <rect>
-     <x>130</x>
-     <y>300</y>
-     <width>93</width>
-     <height>28</height>
-    </rect>
-   </property>
-   <property name="font">
-    <font>
-     <family>MS Sans Serif</family>
-     <pointsize>9</pointsize>
-    </font>
-   </property>
-   <property name="text">
-    <string>Change Role</string>
-   </property>
-  </widget>
   <widget class="QLabel" name="label_2">
    <property name="geometry">
     <rect>
@@ -313,7 +294,7 @@
     </rect>
    </property>
   </widget>
-  <widget class="QLabel" name="facility">
+  <widget class="QLabel" name="facilityText">
    <property name="geometry">
     <rect>
      <x>310</x>
@@ -326,7 +307,7 @@
     <string/>
    </property>
   </widget>
-  <widget class="QLabel" name="workstation">
+  <widget class="QLabel" name="workstationText">
    <property name="geometry">
     <rect>
      <x>30</x>

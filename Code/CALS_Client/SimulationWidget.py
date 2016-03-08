@@ -3,12 +3,17 @@ from PyQt5.QtWidgets import *
 from PyQt5.uic import loadUi   
 import time
 import pymysql
+import json
+import requests
+
+API_BASE_URL = "http://localhost:3000/api/cals/"
 
 """ db connection """
 DB_HOST = '193.10.30.129'
 DB_USER = 'root'
 DB_PASSWORD = 'JTH123!'
 DB_NAME = 'cals_sim'
+
 
 def dbConnection():
     connection = pymysql.connect(host=DB_HOST,
@@ -19,6 +24,34 @@ def dbConnection():
 
 
 connection = dbConnection()
+
+
+def sendLogEventNarms(url, d_list):
+    """
+    Input: d_list: List with strings
+    """
+
+    print(d_list[0])
+
+    json_format = {"event_type": d_list[0], "controller_role": d_list[1], "controller_resp": d_list[2], "operational_status": d_list[3],"date": d_list[4], "user_id": d_list[5], "facility_id": d_list[6],"workstation_id": d_list[7] }
+    postRequest(url, json_format)
+
+
+def postRequest(url,jsonString):
+    """
+    Input: url: String, jsonString: dictionary
+    Output: the body of the response or None if the status code is different than 200
+    Purpose: Sends the JSON dictionairy to the specified url via POST.
+    """
+    global API_BASE_URL
+
+    resp = requests.post(API_BASE_URL + url, jsonString)
+    print(resp)
+    if resp.status_code == 200:
+        return resp.text
+    return None
+
+
 
 class SimulationWidget(QDialog):
 
@@ -121,6 +154,8 @@ class LogWidget(QDialog):
                     connect.execute("INSERT INTO log_events (event_type, controller_role, controller_responsability, operational_status, date, send_to_narms, usersid, facilitiesid, workstationsid) VALUES (%s, %s,%s,%s,NOW(),%s,%s,%s,%s)", v) 
                     connection.commit()
                     self.slot_1 = 0
+                    d_list = ["logout", self.role.currentText(), self.controller_responsability.currentText(), self.operational_status.currentText(), time.strftime('%Y-%m-%d %H:%M:%S'), int(userId), int(facilityId), int(workstationId)]
+                    sendLogEventNarms("/log_events", d_list)
                     self.error.setText("Logout Succes")
             elif(userId == 2):
                     userId = self.slot_2
@@ -135,6 +170,8 @@ class LogWidget(QDialog):
                     connect.execute("INSERT INTO log_events (event_type, controller_role, controller_responsability, operational_status, date, send_to_narms, usersid, facilitiesid, workstationsid) VALUES (%s, %s,%s,%s,NOW(),%s,%s,%s,%s)", v) 
                     connection.commit()
                     self.slot_2 = 0
+                    d_list = ["logout", self.role.currentText(), self.controller_responsability.currentText(), self.operational_status.currentText(), time.strftime('%Y-%m-%d %H:%M:%S'), int(userId), int(facilityId), int(workstationId)]
+                    sendLogEventNarms("/log_events", d_list)
                     self.error.setText("Logout Succes")
             else:
                 if (self.slot_1 == 0 or self.slot_2 == 0):
@@ -154,6 +191,8 @@ class LogWidget(QDialog):
                     connect.execute("INSERT INTO log_events (event_type, controller_role, controller_responsability, operational_status, date, send_to_narms, usersid, facilitiesid, workstationsid) VALUES (%s, %s,%s,%s,NOW(),%s,%s,%s,%s)", v) 
                     connection.commit()
                     self.slot_1 = 0
+                    d_list = ["logout", self.role.currentText(), self.controller_responsability.currentText(), self.operational_status.currentText(), time.strftime('%Y-%m-%d %H:%M:%S'), int(userId), int(facilityId), int(workstationId)]
+                    sendLogEventNarms("/log_events", d_list)
                     self.error.setText("Logout Succes")
 
                 if (self.slot_2 != 0):
@@ -176,6 +215,8 @@ class LogWidget(QDialog):
                     connect.execute("INSERT INTO log_events (event_type, controller_role, controller_responsability, operational_status, date, send_to_narms, usersid, facilitiesid, workstationsid) VALUES (%s, %s,%s,%s,NOW(),%s,%s,%s,%s)", v)
                     self.slot_2 = 0 
                     connection.commit()
+                    d_list = ["logout", self.role.currentText(), self.controller_responsability.currentText(), self.operational_status.currentText(), time.strftime('%Y-%m-%d %H:%M:%S'), int(userId), int(facilityId), int(workstationId)]
+                    sendLogEventNarms("/log_events", d_list)
                     self.error.setText("Logout Succes")
                     
 
@@ -198,6 +239,8 @@ class LogWidget(QDialog):
                     connect = connection.cursor()
                     connect.execute("INSERT INTO log_events (event_type, controller_role, controller_responsability, operational_status, date, send_to_narms, usersid, facilitiesid, workstationsid) VALUES (%s, %s,%s,%s,NOW(),%s,%s,%s,%s)", v) 
                     connection.commit()
+                    d_list = ["update", self.role.currentText(), self.controller_responsability.currentText(), self.operational_status.currentText(), time.strftime('%Y-%m-%d %H:%M:%S'), int(userId), int(facilityId), int(workstationId)]
+                    sendLogEventNarms("/log_events", d_list)
             elif (userId == 2):
                     self.cur.execute("SELECT * FROM users u WHERE u.name LIKE %s ", self.controller_id_2.currentText())
                     userMysql = self.cur.fetchone()
@@ -217,6 +260,8 @@ class LogWidget(QDialog):
                     connect = connection.cursor()
                     connect.execute("INSERT INTO log_events (event_type, controller_role, controller_responsability, operational_status, date, send_to_narms, usersid, facilitiesid, workstationsid) VALUES (%s, %s,%s,%s,NOW(),%s,%s,%s,%s)", v) 
                     connection.commit()
+                    d_list = ["update", self.role.currentText(), self.controller_responsability.currentText(), self.operational_status.currentText(), time.strftime('%Y-%m-%d %H:%M:%S'), int(userId), int(facilityId), int(workstationId)]
+                    sendLogEventNarms("/log_events", d_list)
 
     def loginAction(self):
         if (self.controller_id_1.currentText() == self.controller_id_2.currentText()):
@@ -242,6 +287,8 @@ class LogWidget(QDialog):
                     connect.execute("INSERT INTO log_events (event_type, controller_role, controller_responsability, operational_status, date, send_to_narms, usersid, facilitiesid, workstationsid) VALUES (%s, %s,%s,%s,NOW(),%s,%s,%s,%s)", v) 
                     connection.commit()
                     self.slot_1 = userId
+                    d_list = ["login", self.role.currentText(), self.controller_responsability.currentText(), self.operational_status.currentText(), time.strftime('%Y-%m-%d %H:%M:%S'), int(userId), int(facilityId), int(workstationId)]
+                    sendLogEventNarms("/log_events", d_list)
                     self.error.setText("Login Succes")
             if (self.controller_id_2.currentText() != "choice"):
                 self.cur.execute("SELECT * FROM users u WHERE u.name LIKE %s ", self.controller_id_2.currentText())
@@ -266,7 +313,9 @@ class LogWidget(QDialog):
                         v = ("login", self.role.currentText(), self.controller_responsability.currentText(), "MCT", 0, int(userId), int(facilityId), int(workstationId))
                     connect = connection.cursor()
                     connect.execute("INSERT INTO log_events (event_type, controller_role, controller_responsability, operational_status, date, send_to_narms, usersid, facilitiesid, workstationsid) VALUES (%s, %s,%s,%s,NOW(),%s,%s,%s,%s)", v) 
-                    connection.commit()              
+                    connection.commit()
+                    d_list = ["login", self.role.currentText(), self.controller_responsability.currentText(), self.operational_status.currentText(), time.strftime('%Y-%m-%d %H:%M:%S'), int(userId), int(facilityId), int(workstationId)]
+                    sendLogEventNarms("/log_events", d_list)
                     self.slot_2 = userId
                     self.error.setText("Login Succes")
             else:

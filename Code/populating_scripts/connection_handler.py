@@ -12,7 +12,6 @@ def postRequest(url,jsonString):
     global API_BASE_URL
 
     resp = requests.post(API_BASE_URL + url, jsonString)
-    print(resp)
     if resp.status_code == 200:
         return resp.text
     return None

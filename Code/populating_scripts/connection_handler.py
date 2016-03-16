@@ -1,7 +1,7 @@
 import requests
 
 # TODO : replace localhost:3000 with the adress of 
-API_BASE_URL = "http://localhost:3000/api/cals/"
+API_BASE_URL = "http://193.10.30.126/api/cals/"
 
 def postRequest(url,jsonString):
     """
@@ -12,6 +12,7 @@ def postRequest(url,jsonString):
     global API_BASE_URL
 
     resp = requests.post(API_BASE_URL + url, jsonString)
+    print(resp.status_code)
     if resp.status_code == 200:
         return resp.text
     return None

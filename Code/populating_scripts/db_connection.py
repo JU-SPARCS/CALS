@@ -143,6 +143,30 @@ def insert_log_event(event_type, controller_role, controller_responsability,
     connection.commit()
 
 
+def insert_log_event_pub(event_type, controller_role, controller_responsability,
+                        operational_status, date, user_pub_id, workstation_pub_id, facility_id):
+    """
+    Send a new log_event to NARMS and store it in the database
+    The IDs passed as parameters are the IDs in the CALS DB, not the public IDs
+    """
+    ## Send the log event to NARMS
+    # Create the json input of the request
+    token = get_facility_token(facility_id)
+    json = {
+        "token" : token,
+        "event_type" : event_type,
+        "worker_role" : controller_role,
+        "worker_responsability" : controller_responsability,
+        "operational_status" : operational_status,
+        "happened_at" : date,
+        "user_id" : user_pub_id,
+        "workstation_id" : workstation_pub_id
+    }
+    # send the request
+    resp = postRequest(get_facility_pub_id(facility_id) + "/" + "log_events", json)
+    if resp == None:
+        return None
+
 def get_facility_token(facility_id):
     connect = connection.cursor()
     connect.execute("SELECT api_key FROM facilities \

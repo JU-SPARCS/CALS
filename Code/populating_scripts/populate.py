@@ -27,19 +27,20 @@ facility_id = 1
 
 # To set a specific date:
 # datetime.datetime(2006, 11, 21, 16, 30, 23).strftime("%Y-%m-%d %H-%M-%S") => 21-11-2006 16:30:23
-insert_log_event("login", "PE", "Planning", "SC", datetime.datetime(2016, 03, 15, 8, 58, 23).strftime("%Y-%m-%d %H-%M-%S"), user1_id, wk_id, facility_id)
+user1_id = "7e59da37227"
+wk_id = "96259b27a5d"
 
-insert_log_event("role_change", "RT", "Planning", "SC", datetime.datetime(2016, 03, 15, 9, 28, 42).strftime("%Y-%m-%d %H-%M-%S"), user1_id, wk_id, facility_id)
+insert_log_event_pub("login", "PE", "Planning", "SC", datetime.datetime(2016, 3, 15, 8, 58, 23).strftime("%Y-%m-%d %H-%M-%S"), user1_id, wk_id, facility_id)
 
-insert_log_event("logout", "PE", "Planning", "SC", datetime.datetime(2016, 03, 15, 10, 00, 4).strftime("%Y-%m-%d %H-%M-%S"), user1_id, wk_id, facility_id)
+insert_log_event_pub("role_change", "RT", "Planning", "SC", datetime.datetime(2016, 3, 15, 9, 28, 42).strftime("%Y-%m-%d %H-%M-%S"), user1_id, wk_id, facility_id)
 
-insert_log_event("login", "PE", "Planning", "SC", datetime.datetime(2016, 03, 16, 10, 30, 45).strftime("%Y-%m-%d %H-%M-%S"), user1_id, wk_id, facility_id)
+insert_log_event_pub("logout", "PE", "Planning", "SC", datetime.datetime(2016, 3, 15, 10, 00, 4).strftime("%Y-%m-%d %H-%M-%S"), user1_id, wk_id, facility_id)
 
-insert_log_event("role_change", "RT", "Planning", "MCI", datetime.datetime(2016, 03, 16, 10, 56, 52).strftime("%Y-%m-%d %H-%M-%S"), user1_id, wk_id, facility_id)
-insert_log_event("login", "RT", "Planning", "MCT", datetime.datetime(2016, 03, 16, 10, 56, 52).strftime("%Y-%m-%d %H-%M-%S"), user2_id, wk_id, facility_id)
+insert_log_event_pub("login", "PE", "Planning", "SC", datetime.datetime(2016, 3, 16, 10, 30, 45).strftime("%Y-%m-%d %H-%M-%S"), user1_id, wk_id, facility_id)
 
-insert_log_event("logout", "RT", "Planning", "MCI", datetime.datetime(2016, 03, 16, 11, 29, 50).strftime("%Y-%m-%d %H-%M-%S"), user1_id, wk_id, facility_id)
-insert_log_event("logout", "RT", "Planning", "MCT", datetime.datetime(2016, 03, 16, 11, 29, 45).strftime("%Y-%m-%d %H-%M-%S"), user2_id, wk_id, facility_id)
+insert_log_event_pub("role_change", "RT", "Planning", "MCI", datetime.datetime(2016, 3, 16, 10, 56, 52).strftime("%Y-%m-%d %H-%M-%S"), user1_id, wk_id, facility_id)
+
+insert_log_event_pub("logout", "RT", "Planning", "MCI", datetime.datetime(2016, 3, 16, 11, 29, 50).strftime("%Y-%m-%d %H-%M-%S"), user1_id, wk_id, facility_id)
 
 # close connection to the DB
 close_connection()
